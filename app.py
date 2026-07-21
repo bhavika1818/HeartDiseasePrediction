@@ -1,20 +1,22 @@
 from flask import Flask, render_template, request
 import joblib
-import numpy as np
 
 # Create Flask App
 app = Flask(__name__)
 
-# Load trained model
+# Load the trained model
 model = joblib.load("heart_disease_model.pkl")
+
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
+
 @app.route("/predict", methods=["POST"])
 def predict():
-
+    print("Predict function called")
+    # Get input values from form
     features = [
         float(request.form["age"]),
         float(request.form["sex"]),
@@ -31,14 +33,24 @@ def predict():
         float(request.form["thal"])
     ]
 
+    # Debug prints
+    print("=" * 60)
+    print("Received Features:")
+    print(features)
+
     prediction = model.predict([features])
 
+    print("Prediction:", prediction)
+    print("=" * 60)
+
+    # Display result
     if prediction[0] == 1:
         result = "⚠ High Risk of Heart Disease"
     else:
         result = "✅ Low Risk of Heart Disease"
 
     return render_template("index.html", prediction=result)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

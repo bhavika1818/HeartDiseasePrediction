@@ -46,9 +46,9 @@
 
     </form>
 
-    {% if prediction %}
-        <h2>{{ prediction }}</h2>
-    {% endif %}
+    {% if prediction is defined %}
+    <h2>{{ prediction }}</h2>
+{% endif %}
 
 </div>
 
