@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PulseCheck · Heart health screening</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero"><div class="eyebrow">PULSECHECK / SCREENING TOOL</div><h1>A clearer view of your <em>heart health.</em></h1><p>Enter the clinical measurements below for a model-based screening estimate. This is not a diagnosis.</p></section>
+    <section class="card">
+      <form id="screening-form">
+        <div class="section-title"><span>01</span><h2>Personal profile</h2></div>
+        <div class="grid"><label>Age <input name="age" type="number" min="1" max="120" required placeholder="e.g. 52"></label><label>Sex <select name="sex" required><option value="">Select</option><option value="1">Male</option><option value="0">Female</option></select></label></div>
+        <div class="section-title"><span>02</span><h2>Clinical measurements</h2></div>
+        <div class="grid"><label>Chest pain type <select name="cp" required><option value="">Select</option><option value="0">Typical angina</option><option value="1">Atypical angina</option><option value="2">Non-anginal pain</option><option value="3">Asymptomatic</option></select></label><label>Resting blood pressure <input name="trestbps" type="number" min="50" max="300" required placeholder="mm Hg"></label><label>Cholesterol <input name="chol" type="number" min="50" max="700" required placeholder="mg/dL"></label><label>Maximum heart rate <input name="thalach" type="number" min="50" max="250" required placeholder="bpm"></label><label>Oldpeak <input name="oldpeak" type="number" min="0" max="10" step="0.1" required placeholder="ST depression"></label></div>
+        <div class="section-title"><span>03</span><h2>Test results</h2></div>
+        <div class="grid"><label>Fasting blood sugar <select name="fbs" required><option value="">Select</option><option value="1">Above 120 mg/dL</option><option value="0">120 mg/dL or below</option></select></label><label>Resting ECG <select name="restecg" required><option value="">Select</option><option value="0">Normal</option><option value="1">ST-T abnormality</option><option value="2">Left ventricular hypertrophy</option></select></label><label>Exercise angina <select name="exang" required><option value="">Select</option><option value="1">Yes</option><option value="0">No</option></select></label><label>Slope <select name="slope" required><option value="">Select</option><option value="0">Upsloping</option><option value="1">Flat</option><option value="2">Downsloping</option></select></label><label>Major vessels (0–4) <input name="ca" type="number" min="0" max="4" required placeholder="0–4"></label><label>Thalassemia <select name="thal" required><option value="">Select</option><option value="1">Normal</option><option value="2">Fixed defect</option><option value="3">Reversible defect</option><option value="0">Unknown / other</option></select></label></div>
+        <button type="submit">Run screening <span>→</span></button><p class="fine-print">Your entries are processed locally by this app and are not medical advice.</p>
+      </form>
+      <aside id="result" class="result empty"><div class="result-icon">✦</div><p class="eyebrow">YOUR RESULT</p><h2>Ready when you are</h2><p>Complete the form to receive a screening estimate.</p></aside>
+    </section>
+  </main>
+  <script>
+    const form=document.querySelector('#screening-form'), result=document.querySelector('#result');
+    form.addEventListener('submit', async e=>{e.preventDefault(); result.className='result loading'; result.innerHTML='<div class="result-icon">…</div><p class="eyebrow">ANALYZING</p><h2>Reading your results</h2><p>Please wait a moment.</p>'; const data=Object.fromEntries(new FormData(form)); try { const r=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); const d=await r.json(); if(!r.ok) throw new Error('Please check every field.'); const high=d.prediction===1; result.className='result '+(high?'high':'low'); result.innerHTML='<div class="result-icon">'+(high?'!':'✓')+'</div><p class="eyebrow">SCREENING ESTIMATE</p><h2>'+d.label+'</h2><div class="score">'+(d.probability===null?'—':d.probability+'%')+'</div><p>This estimate reflects patterns in the training data. Speak with a qualified clinician for proper evaluation.</p>'; } catch(err){result.className='result error'; result.innerHTML='<div class="result-icon">!</div><h2>Could not complete screening</h2><p>'+err.message+'</p>';}});
+  </script>
+</body></html>
